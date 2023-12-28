@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Use `npx prisma generate` to run Prisma Client
+// This model defines the User table
+
+model User {
+  id          String   @id @unique
+  dni         Int      @unique
+  firstname   String
+  lastname    String
+  password    String
+  is_active   Boolean
+  birthday    DateTime
+  created_at  DateTime
+  updated_at  DateTime
+
+  email   String
+  phone   String
+  student Student[]
+  teacher Teacher[]
+}
+
+// This model defines the Student table
+model Student {
+  id          String   @id @unique
+  courses_completed Int
+  user              User   @relation(fields: [user_id], references: [id])
+  user_id           String @unique
+
+  section Student_Section[]
+}
+
+// This model defines the Teacher table
+model Teacher {
+  id      String @id @unique
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String @unique
+
+  section Section[]
+  course  Teacher_Course[]
+}
+
+// This model defines the Course table
+model Course {
+  id   String @id @unique
+  name String
+
+  teacher Teacher_Course[]
+  section Section[]
+}
+
+// This model defines the Course Section table
+model Section {
+  id               String   @id @unique
+  number           Int
+  remaining_quotas Int
+  schedule         DateTime
+
+  student  Student_Section[]
+
+  course   Course @relation(fields: [course_id], references: [id])
+  course_id String
+
+  teacher Teacher @relation(fields: [teacher_id], references: [id])
+  teacher_id String
+}
+
+// @Relations
+model Student_Section {
+  id String @id @unique
+
+  student    Student @relation(fields: [student_id], references: [id])
+  student_id String
+
+  section    Section @relation(fields: [section_id], references: [id])
+  section_id String
+}
+
+model Teacher_Course {
+  id String @id @unique
+
+  teacher    Teacher @relation(fields: [teacher_id], references: [id])
+  teacher_id String
+
+  course    Course @relation(fields: [course_id], references: [id])
+  course_id String
+}
